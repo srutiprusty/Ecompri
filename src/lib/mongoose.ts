@@ -1,17 +1,23 @@
 import mongoose from "mongoose";
 
 const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/your-db-name";
+  process.env.MONGODB_URI || process.env.NEXT_PUBLIC_MONGODB_URI;
 
-let cached = (global as any).mongoose || { conn: null, promise: null };
+if (!MONGODB_URI) {
+  console.warn("MONGODB_URI not set. Set it in .env.local as MONGODB_URI=");
+}
+
+let cached: {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+} = (global as any)._mongooseCache || { conn: null, promise: null };
 
 export default async function connectDB() {
   if (cached.conn) return cached.conn;
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
-      bufferCommands: false,
-    });
+    cached.promise = mongoose.connect(MONGODB_URI!, {}).then((m) => m);
   }
   cached.conn = await cached.promise;
+  (global as any)._mongooseCache = cached;
   return cached.conn;
 }

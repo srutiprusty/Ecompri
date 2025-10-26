@@ -82,16 +82,14 @@ async function scrapeFlipkart(searchTerm: string) {
         try {
           // Try multiple title selectors
           const titleSelectors = [
-            "._4rR01T",
-            "._2B099V",
-            ".s-title",
-            '[class*="title"]',
-            "a[title]",
-            "div[title]",
-            "h1",
-            "h2",
-            "h3",
-            "h4",
+            "._4rR01T", // Primary title selector
+            ".IRpwTa", // Title in product link
+            ".s1Q9rs", // Another common title class
+            "._2WkVRV", // Brand name
+            "._3eWWd-", // Product name
+            "a[title]", // Title in anchor tag
+            '[class*="product-title"]',
+            '[class*="productTitle"]',
           ];
 
           let titleEl: Element | null = null;
@@ -128,9 +126,7 @@ async function scrapeFlipkart(searchTerm: string) {
           const title = titleEl?.textContent?.trim() || null;
           const priceText =
             priceEl?.textContent?.replace(/[^0-9]/g, "") || null;
-          const url = urlEl?.href
-            ? `https://www.flipkart.com${urlEl.href}`
-            : null;
+          const url = urlEl?.href ? `${urlEl.href}` : null;
           const image = imageEl?.src || null;
           const rating = ratingEl ? parseFloat(ratingEl.textContent || "0") : 0;
 
@@ -171,7 +167,7 @@ async function scrapeFlipkart(searchTerm: string) {
                 platform: "Flipkart",
                 title,
                 price: parseInt(priceText, 10),
-                url: `https://www.flipkart.com${anchor.href}`,
+                url: `${anchor.href}`,
                 image: null,
                 rating: 0,
                 timestamp: new Date().toISOString(),

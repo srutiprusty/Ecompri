@@ -8,8 +8,18 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 async function scrapeAmazon(searchTerm: string) {
   let browser;
   try {
+    const headless = (() => {
+      if (process.env.PUPPETEER_HEADLESS !== undefined) {
+        return (
+          process.env.PUPPETEER_HEADLESS === "1" ||
+          process.env.PUPPETEER_HEADLESS === "true"
+        );
+      }
+      return process.env.NODE_ENV === "production";
+    })();
+
     browser = await puppeteer.launch({
-      headless: false,
+      headless,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
@@ -44,12 +54,19 @@ async function scrapeAmazon(searchTerm: string) {
       const items = document.querySelectorAll(
         '.s-result-item[data-asin]:not([data-asin=""])'
       );
+      console.log("Found items:", items.length);
+
       for (const item of items) {
         try {
+          // Multiple selectors for title to handle different layouts
           const titleEl = item.querySelector(
-            ".a-size-medium.a-color-base.a-text-normal"
+            "h2 a.a-link-normal span, .a-size-medium.a-color-base.a-text-normal, .a-size-base-plus.a-color-base.a-text-normal"
           );
-          const priceEl = item.querySelector(".a-price-whole");
+
+          // Multiple selectors for price to handle different layouts
+          const priceEl = item.querySelector(
+            ".a-price .a-price-whole, .a-price-whole"
+          );
 
           // Use type assertion for a more specific Element type
           const urlEl = item.querySelector(

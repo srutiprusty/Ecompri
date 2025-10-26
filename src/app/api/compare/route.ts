@@ -8,7 +8,7 @@ import { compareProducts } from "@/lib/compareProducts";
 import scrapeAmazon from "@/lib/scrapeAmazon";
 import scrapeFlipkart from "@/lib/scrapeFlipkart";
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("query");

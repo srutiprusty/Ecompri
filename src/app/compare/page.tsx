@@ -62,50 +62,74 @@ const page = () => {
         setSearchResults([]); // Clear previous results
 
         try {
-            const res = await fetch(`/api/compare?query=${encodeURIComponent(searchQuery)}`);
+            const res = await fetch(`/api/compare?query=${encodeURIComponent(searchQuery)}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
             const data = await res.json();
 
-            // Debug: log the API response
             console.log("API Response:", data);
+            console.log("Amazon Products:", data.totalProducts?.amazon || 0);
+            console.log("Flipkart Products:", data.totalProducts?.flipkart || 0);
+            console.log("Comparison Results:", data.comparison);
 
             if (!res.ok) {
-                setError(data.message || "Failed to fetch data");
+                setError(data.error || data.message || "Failed to fetch data");
                 setSearchResults([]);
-            } else {
-                // Check if comparison data exists and has items
-                if (!data.comparison || !data.comparison.items) {
-                    console.error("Invalid API response structure:", data);
-                    setError("Invalid data format received from server");
-                    setSearchResults([]);
-                    return;
-                }
+                return;
+            }
 
-                // Map API comparison data to Product[] structure
-                const products: Product[] = data.comparison.items.map(
-                    (
-                        item: any,
-                        index: number // We generate ID here since API doesn't provide it
-                    ) => ({
+            if (data.error) {
+                setError(data.error);
+                setSearchResults([]);
+                return;
+            }
+
+            // Handle the comparison data structure
+            const comparisonData = data.comparison;
+
+            if (!comparisonData || (!comparisonData.items && !Array.isArray(comparisonData))) {
+                console.error("Invalid comparison data:", data);
+                setError("No comparison results found");
+                setSearchResults([]);
+                return;
+            }
+
+            const items = Array.isArray(comparisonData) ? comparisonData : comparisonData.items || [];
+
+            if (!items.length) {
+                console.error("No comparison items:", data);
+                setError("No products found to compare");
+                setSearchResults([]);
+                return;
+            }
+
+            console.log("Processing comparison items:", items);
+
+            const products: Product[] = items
+                .filter(item => item.amazon && item.flipkart) // Only include items with both platform data
+                .map((item: any, index: number) => {
+                    console.log("Processing item:", item); // Debug log
+                    return {
                         id: index + 1,
-                        productName: item.title,
-                        image: item.amazon.image || item.flipkart.image || "",
+                        productName: item.title || "Unknown Product",
+                        image: item.amazon?.image || item.flipkart?.image || "",
                         amazon: {
-                            price: item.amazon.price,
-                            rating: item.amazon.rating,
-                            reviews: 0, // reviews not in API; set 0 or extend API
-                            url: item.amazon.url,
+                            price: Number(item.amazon?.price) || 0,
+                            rating: Number(item.amazon?.rating) || 0,
+                            reviews: Number(item.amazon?.reviews) || 0,
+                            url: item.amazon?.url || "#",
                         },
                         flipkart: {
-                            price: item.flipkart.price,
-                            rating: item.flipkart.rating,
-                            reviews: 0,
-                            url: item.flipkart.url,
+                            price: Number(item.flipkart?.price) || 0,
+                            rating: Number(item.flipkart?.rating) || 0,
+                            reviews: Number(item.flipkart?.reviews) || 0,
+                            url: item.flipkart?.url || "#",
                         },
-                    })
-                );
+                    };
+                });
 
-                setSearchResults(products);
-            }
+            setSearchResults(products);
         } catch (e) {
             console.error("Fetch error:", e);
             setError("An error occurred while fetching data");
@@ -176,7 +200,7 @@ const page = () => {
 
                     {/* Search Results */}
                     {searchResults.length > 0 && !isLoading && (
-                        <div className="max-w-6xl mx-auto">
+                        <div className="w-full">
                             <h2 className="text-3xl font-bold mb-8 text-left">Search Results</h2>
                             <div className="space-y-6">
                                 {searchResults.map((product) => {
@@ -189,39 +213,35 @@ const page = () => {
                                             className=" rounded-xl p-6 border border-gray-700"
                                             style={{ backgroundColor: "rgba(255, 255, 255, 0.05)" }}
                                         >
-                                            <div className="flex flex-col lg:flex-row gap-6">
-                                                {/* Product Info */}
-                                                <div className="flex-1">
-                                                    <div className="flex flex-col sm:flex-row gap-4">
-                                                        <img
-                                                            src={product.image}
-                                                            alt={product.productName}
-                                                            className="w-32 h-32 object-cover rounded-lg mx-auto sm:mx-0"
-                                                        />
-                                                        <div className="flex-1">
-                                                            <h3 className="text-xl font-semibold mb-2 text-center sm:text-left">
-                                                                {product.productName}
-                                                            </h3>
-                                                            {savings > 0 && (
-                                                                <div className="flex items-center justify-center sm:justify-start gap-2 mb-4">
-                                                                    <TrendingDown className="w-5 h-5 text-green-500" />
-                                                                    <span className="text-green-500 font-medium">
-                                                                        Save up to {formatPrice(savings)}
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                        </div>
+                                            <div className="flex flex-col gap-6">
+                                                {/* Top row: image and product name */}
+                                                <div className="flex gap-6 items-center">
+                                                    <img
+                                                        src={product.image}
+                                                        alt={product.productName}
+                                                        className="w-32 h-32 object-contain rounded-md"
+                                                    />
+                                                    <div className="flex-1">
+                                                        <h3 className="text-xl font-semibold">
+                                                            {product.productName}
+                                                        </h3>
+                                                        {savings > 0 && (
+                                                            <div className="flex items-center gap-2 mt-2">
+                                                                <TrendingDown className="w-5 h-5 text-green-500" />
+                                                                <span className="text-green-500 font-medium">
+                                                                    Save up to {formatPrice(savings)}
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
 
-                                                {/* Price Comparison Cards */}
-                                                <div className="flex flex-col sm:flex-row gap-4 lg:w-2/3">
-                                                    {/* Amazon Card */}
+                                                {/* Bottom row: cards full width */}
+                                                <div className="flex flex-row gap-4">
+                                                    {/* Amazon card */}
                                                     <div
-                                                        className={`flex-1 bg-gray-700 rounded-lg p-4 border-2 ${bestPrice === "amazon"
-                                                            ? "border-green-500"
-                                                            : "border-transparent"
-                                                            }`}
+                                                        className={`bg-gray-700 rounded-lg p-4 border-2 flex-1 ${bestPrice === "amazon" ? "border-green-500" : "border-transparent"}`}
+                                                        style={{ minHeight: 200 }}
                                                     >
                                                         <div className="flex items-center justify-between mb-3">
                                                             <div className="flex items-center gap-2">
@@ -237,16 +257,8 @@ const page = () => {
                                                             </div>
                                                         </div>
 
-                                                        <div className="text-2xl font-bold text-orange-400 mb-2">
+                                                        <div className="text-3xl font-bold text-orange-400 mb-2">
                                                             {formatPrice(product.amazon.price)}
-                                                        </div>
-
-                                                        <div className="flex items-center gap-1 mb-3">
-                                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                                            <span className="text-sm">{product.amazon.rating}</span>
-                                                            <span className="text-gray-400 text-sm">
-                                                                ({product.amazon.reviews} reviews)
-                                                            </span>
                                                         </div>
 
                                                         <button
@@ -258,12 +270,10 @@ const page = () => {
                                                         </button>
                                                     </div>
 
-                                                    {/* Flipkart Card */}
+                                                    {/* Flipkart card */}
                                                     <div
-                                                        className={`flex-1 bg-gray-700 rounded-lg p-4 border-2 ${bestPrice === "flipkart"
-                                                            ? "border-green-500"
-                                                            : "border-transparent"
-                                                            }`}
+                                                        className={`bg-gray-700 rounded-lg p-4 border-2 flex-1 ${bestPrice === "flipkart" ? "border-green-500" : "border-transparent"}`}
+                                                        style={{ minHeight: 200 }}
                                                     >
                                                         <div className="flex items-center justify-between mb-3">
                                                             <div className="flex items-center gap-2">
@@ -279,16 +289,8 @@ const page = () => {
                                                             </div>
                                                         </div>
 
-                                                        <div className="text-2xl font-bold text-blue-400 mb-2">
+                                                        <div className="text-3xl font-bold text-blue-400 mb-2">
                                                             {formatPrice(product.flipkart.price)}
-                                                        </div>
-
-                                                        <div className="flex items-center gap-1 mb-3">
-                                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                                            <span className="text-sm">{product.flipkart.rating}</span>
-                                                            <span className="text-gray-400 text-sm">
-                                                                ({product.flipkart.reviews} reviews)
-                                                            </span>
                                                         </div>
 
                                                         <button
@@ -301,6 +303,7 @@ const page = () => {
                                                     </div>
                                                 </div>
                                             </div>
+
                                         </div>
                                     );
                                 })}

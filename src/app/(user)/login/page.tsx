@@ -11,7 +11,7 @@ import {
     ShoppingCart,
 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
-
+import { login, register, googleLogin } from "@/lib/auth";
 // Types
 interface FormData {
     email: string;
@@ -113,10 +113,30 @@ export default function ModernAuthPage() {
         }
 
         setIsLoading(true);
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        setIsLoading(false);
+        try {
+            if (isLogin) {
+                await login(formData.email, formData.password);
+                alert("Login successful!");
+            } else {
+                await register(formData.email, formData.password);
+                alert("Account created successfully!");
+            }
+        } catch (error) {
+            console.error("Authentication error:", error);
+            alert("Authentication failed. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-        alert(isLogin ? "Login successful!" : "Account created successfully!");
+    const handleGoogleLogin = async () => {
+        try {
+            await googleLogin();
+            alert("Google login successful!");
+        } catch (error) {
+            console.error("Google login error:", error);
+            alert("Google login failed. Please try again.");
+        }
     };
 
     const socialLogins = [
@@ -387,6 +407,7 @@ export default function ModernAuthPage() {
                                     key={social.name}
                                     type="button"
                                     className="flex items-center justify-center py-3 px-4 border-2 border-gray-600 bg-gray-700 rounded-xl"
+                                    onClick={social.name === "Google" ? handleGoogleLogin : undefined} // Add onClick for Google login
                                 >
                                     {social.icon}
                                     <span className="ml-2">{social.title}</span>
