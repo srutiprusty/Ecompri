@@ -1,17 +1,12 @@
 "use client"
-import React, { useState } from "react";
-import Link from "next/link";
+
+import React from "react";
 import { motion } from "framer-motion";
 import {
-  Search,
   Clock,
   DollarSign,
   Users,
   TrendingUp,
-  ShoppingCart,
-  User,
-  Heart,
-  Bell,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 import Step from "@/app/_components/Step";
@@ -24,61 +19,11 @@ interface FeatureCardProps {
   title: string;
   description: string;
 }
-interface Product {
-  id: number;
-  name: string;
-  image: string;
-  prices: { store: string; price: number; originalPrice: number }[];
-  bestPrice: number;
-  savings: number;
-}
+
 
 const PricePeekApp = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("home");
 
-  // Sample product data
-  const [products] = useState<Product[]>([
-    {
-      id: 1,
-      name: "iPhone 15 Pro",
-      image:
-        "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=200&h=200&fit=crop",
-      prices: [
-        { store: "Amazon", price: 999, originalPrice: 1099 },
-        { store: "Best Buy", price: 1049, originalPrice: 1099 },
-        { store: "Apple Store", price: 1099, originalPrice: 1099 },
-      ],
-      bestPrice: 999,
-      savings: 100,
-    },
-    {
-      id: 2,
-      name: "MacBook Air M2",
-      image:
-        "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=200&h=200&fit=crop",
-      prices: [
-        { store: "Amazon", price: 1099, originalPrice: 1199 },
-        { store: "Best Buy", price: 1149, originalPrice: 1199 },
-        { store: "Apple Store", price: 1199, originalPrice: 1199 },
-      ],
-      bestPrice: 1099,
-      savings: 100,
-    },
-    {
-      id: 3,
-      name: "Sony WH-1000XM5",
-      image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop",
-      prices: [
-        { store: "Amazon", price: 349, originalPrice: 399 },
-        { store: "Best Buy", price: 379, originalPrice: 399 },
-        { store: "Sony Store", price: 399, originalPrice: 399 },
-      ],
-      bestPrice: 349,
-      savings: 50,
-    },
-  ]);
+
 
   const features: FeatureCardProps[] = [
     {
@@ -128,55 +73,7 @@ const PricePeekApp = () => {
     </motion.div>
   );
 
-  // Product Card
-  /*   interface ProductCardProps {
-        product: Product;
-    }
-    const ProductCard: React.FC<ProductCardProps> = ({ product }) => (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="bg-gray-800 rounded-xl p-6 hover:bg-gray-700 transition-all duration-300"
-        >
-            <div className="relative mb-4">
-                <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-48 object-cover rounded-lg"
-                />
-                <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-sm font-bold">
-                    Save ${product.savings}
-                </div>
-            </div>
-            <h3 className="text-white font-semibold text-lg mb-3">
-                {product.name}
-            </h3>
-            <div className="space-y-2 mb-4">
-                {product.prices.map((price, index: number) => (
-                    <div key={index} className="flex justify-between items-center">
-                        <span className="text-gray-400">{price.store}</span>
-                        <div className="flex items-center gap-2">
-                            <span className="text-white font-bold">${price.price}</span>
-                            {price.originalPrice > price.price && (
-                                <span className="text-gray-500 line-through text-sm">
-                                    ${price.originalPrice}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                ))}
-            </div>
-            <div className="flex items-center justify-between">
-                <span className="text-green-400 font-bold text-lg">
-                    Best: ${product.bestPrice}
-                </span>
-                <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
-                    Compare
-                </button>
-            </div>
-        </motion.div>) */
+
 
 
   return (
@@ -246,31 +143,7 @@ const PricePeekApp = () => {
       </section>
       <section id="steps"><Step /></section>
 
-      {/* Products Section */}
-      {/*    
-            <section className="py-20 px-4">
-                <div className="container mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.7 }}
-                        className="text-center mb-16"
-                    >
-                        <h2 className="text-4xl font-bold mb-4">Trending Comparisons</h2>
-                        <p className="text-gray-400 text-lg">
-                            See what products others are comparing right now
-                        </p>
-                    </motion.div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {products.map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </div>
-                </div>
-            </section>
- */}
       {/* FAQ Section */}
       <section id="faq"><FAQ /></section>
 

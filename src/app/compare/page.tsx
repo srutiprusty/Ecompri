@@ -1,13 +1,10 @@
 "use client";
 import React, { useState } from "react";
+import Image from "next/image";
 
-// Add test queries
-const testQueries = ["iphone", "laptop", "headphones"];
 import {
     Search,
-    ShoppingCart,
     ExternalLink,
-    Star,
     TrendingDown,
 } from "lucide-react";
 import Nav from "../_components/Nav";
@@ -28,7 +25,7 @@ interface Product {
     flipkart: StoreData;
 }
 
-const page = () => {
+const Page = () => {
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [searchResults, setSearchResults] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -107,24 +104,25 @@ const page = () => {
             console.log("Processing comparison items:", items);
 
             const products: Product[] = items
-                .filter(item => item.amazon && item.flipkart) // Only include items with both platform data
-                .map((item: any, index: number) => {
+                .filter((item: unknown) => (item as Record<string, unknown>).amazon && (item as Record<string, unknown>).flipkart) // Only include items with both platform data
+                .map((item: unknown, index: number) => {
                     console.log("Processing item:", item); // Debug log
+                    const typedItem = item as Record<string, unknown>;
                     return {
                         id: index + 1,
-                        productName: item.title || "Unknown Product",
-                        image: item.amazon?.image || item.flipkart?.image || "",
+                        productName: (typedItem.title as string) || "Unknown Product",
+                        image: ((typedItem.amazon as Record<string, unknown>)?.image as string) || ((typedItem.flipkart as Record<string, unknown>)?.image as string) || "",
                         amazon: {
-                            price: Number(item.amazon?.price) || 0,
-                            rating: Number(item.amazon?.rating) || 0,
-                            reviews: Number(item.amazon?.reviews) || 0,
-                            url: item.amazon?.url || "#",
+                            price: Number((typedItem.amazon as Record<string, unknown>)?.price) || 0,
+                            rating: Number((typedItem.amazon as Record<string, unknown>)?.rating) || 0,
+                            reviews: Number((typedItem.amazon as Record<string, unknown>)?.reviews) || 0,
+                            url: ((typedItem.amazon as Record<string, unknown>)?.url as string) || "#",
                         },
                         flipkart: {
-                            price: Number(item.flipkart?.price) || 0,
-                            rating: Number(item.flipkart?.rating) || 0,
-                            reviews: Number(item.flipkart?.reviews) || 0,
-                            url: item.flipkart?.url || "#",
+                            price: Number((typedItem.flipkart as Record<string, unknown>)?.price) || 0,
+                            rating: Number((typedItem.flipkart as Record<string, unknown>)?.rating) || 0,
+                            reviews: Number((typedItem.flipkart as Record<string, unknown>)?.reviews) || 0,
+                            url: ((typedItem.flipkart as Record<string, unknown>)?.url as string) || "#",
                         },
                     };
                 });
@@ -216,10 +214,12 @@ const page = () => {
                                             <div className="flex flex-col gap-6">
                                                 {/* Top row: image and product name */}
                                                 <div className="flex gap-6 items-center">
-                                                    <img
+                                                    <Image
                                                         src={product.image}
                                                         alt={product.productName}
                                                         className="w-32 h-32 object-contain rounded-md"
+                                                        width={128}
+                                                        height={128}
                                                     />
                                                     <div className="flex-1">
                                                         <h3 className="text-xl font-semibold">
@@ -353,4 +353,4 @@ const page = () => {
     );
 };
 
-export default page;
+export default Page;

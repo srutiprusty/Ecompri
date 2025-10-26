@@ -7,10 +7,11 @@ if (!MONGODB_URI) {
   console.warn("MONGODB_URI not set. Set it in .env.local as MONGODB_URI=");
 }
 
-let cached: {
+const cached: {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
-} = (global as any)._mongooseCache || { conn: null, promise: null };
+} = ((globalThis as Record<string, unknown>)
+  ._mongooseCache as typeof cached) || { conn: null, promise: null };
 
 export default async function connectDB() {
   if (cached.conn) return cached.conn;
@@ -18,6 +19,6 @@ export default async function connectDB() {
     cached.promise = mongoose.connect(MONGODB_URI!, {}).then((m) => m);
   }
   cached.conn = await cached.promise;
-  (global as any)._mongooseCache = cached;
+  (globalThis as Record<string, unknown>)._mongooseCache = cached;
   return cached.conn;
 }

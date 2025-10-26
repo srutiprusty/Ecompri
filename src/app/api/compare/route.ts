@@ -37,7 +37,21 @@ export async function POST(request: NextRequest) {
     const normalizedAmazon = normalizeProductData(amazonResults);
     const normalizedFlipkart = normalizeProductData(flipkartResults);
 
-    const comparison = compareProducts(normalizedAmazon, normalizedFlipkart);
+    // Ensure URL is always a string (convert null/undefined to empty string)
+    const normalizedAmazonSafe = normalizedAmazon.map((p) => ({
+      ...p,
+      url: p.url ?? "",
+    }));
+
+    const normalizedFlipkartSafe = normalizedFlipkart.map((p) => ({
+      ...p,
+      url: p.url ?? "",
+    }));
+
+    const comparison = compareProducts(
+      normalizedAmazonSafe,
+      normalizedFlipkartSafe
+    );
 
     const product = await Product.findOneAndUpdate(
       { normalizedName: query.toLowerCase() },

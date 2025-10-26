@@ -50,7 +50,15 @@ async function scrapeAmazon(searchTerm: string) {
     await delay(3000);
 
     const results = await page.evaluate(() => {
-      const products: any[] = [];
+      const products: Array<{
+        platform: string;
+        title: string | null;
+        price: number | null;
+        url: string | null;
+        image: string | null;
+        rating: number;
+        timestamp: string;
+      }> = [];
       const items = document.querySelectorAll(
         '.s-result-item[data-asin]:not([data-asin=""])'
       );

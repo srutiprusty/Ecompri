@@ -7,6 +7,9 @@ interface IScrapedProduct {
   rating: number;
   url: string;
   image?: string | null;
+  platform?: string;
+  discount?: number;
+  lastChecked?: Date;
 }
 
 // Interface for comparison results

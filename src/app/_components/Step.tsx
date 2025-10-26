@@ -1,5 +1,5 @@
 import React from 'react'
-import HeroSection from "@/app/_components/Nav"
+
 const Step = () => {
     return (
         <div>

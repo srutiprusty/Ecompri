@@ -14,7 +14,8 @@ interface IScrapedProduct {
   timestamp: string;
 }
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 async function scrapeFlipkart(searchTerm: string) {
   let browser;
@@ -173,7 +174,8 @@ async function scrapeFlipkart(searchTerm: string) {
                 timestamp: new Date().toISOString(),
               });
             }
-          } catch (e) {
+          } catch {
+            console.error("Error parsing product in fallback");
             // Silently continue
           }
         });
